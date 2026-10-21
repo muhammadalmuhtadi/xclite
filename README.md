@@ -1,70 +1,60 @@
 # xclite
 
-**Versi 1.0 Beta** · Windows x64
+**Version 1.0 Beta** · Windows x64
 
-xclite adalah spreadsheet ringan untuk membuka, mengedit, mencari, memfilter dan meng-query file CSV raksasa (sudah diuji sampai 20 GB dan lebih dari 100 juta baris), juga file Excel (.xlsx).
+xclite is a lightweight spreadsheet for opening, editing, searching, filtering, and querying huge CSV files (tested up to 20 GB and over 100 million rows), as well as Excel (.xlsx) files.
 
-> xclite adalah hasil **fork dan modifikasi dari [GridCraft](https://github.com/storytold/gridcraft) karya ArtCraft Team dan kontributor GridCraft**. Mesin rumus (501 fungsi), format angka, dan pembaca/penulis xlsx berasal dari GridCraft (MIT OR Apache-2.0) dan dipakai tanpa diubah. Di atasnya xclite menambahkan penampil file raksasa, cache kolom, pencarian cepat, filter, dan SQL.
+> xclite is a **fork and modification of [GridCraft](https://github.com/storytold/gridcraft) by the ArtCraft Team and GridCraft contributors**. The formula engine (501 functions), number formatting, and XLSX reader/writer come from GridCraft (MIT OR Apache-2.0) and are used unchanged. On top of these, xclite adds a viewer for huge files, column caching, fast search, filtering, and SQL.
 
-## Unduh dan jalankan
+## Download and run
 
-1. Unduh `release_xclite_betav.01.x64.zip` dari halaman [Releases](https://github.com/muhammadalmuhtadi/xclite/releases).
-2. Ekstrak, lalu jalankan `xclite.exe`. Tidak perlu instalasi.
+1. Download `release_xclite_betav.01.x64.zip` from the [Releases](https://github.com/muhammadalmuhtadi/xclite/releases) page.
+2. Extract it, then run `xclite.exe`. No installation required.
 
-Isi folder:
+Folder contents:
 
-| File | Fungsi |
-|---|---|
-| `xclite.exe` | Aplikasinya (sekitar 22 MB). |
-| `duckdb.dll` | Mesin SQL dan urut. Simpan di folder yang sama dengan `xclite.exe`. Tanpa file ini aplikasi tetap jalan, tetapi SQL dan urut tidak bisa dipakai. |
-| `cache\` | Cache file besar (indeks baris dan cache kolom). Boleh dihapus kapan saja; dibuat ulang saat file dibuka lagi. |
-| `LICENSE-MIT`, `LICENSE-APACHE` | Lisensi GridCraft. |
+| File                            | Purpose                                                                                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `xclite.exe`                    | The application (about 22 MB).                                                                                                                                 |
+| `duckdb.dll`                    | SQL and sorting engine. Keep it in the same folder as `xclite.exe`. The application will still run without this file, but SQL and sorting will be unavailable. |
+| `cache\`                        | Cache for large files (row index and column cache). It can be deleted at any time; it will be recreated when the file is opened again.                         |
+| `LICENSE-MIT`, `LICENSE-APACHE` | GridCraft licenses.                                                                                                                                            |
 
-## Kenapa ringan
+## Why it's lightweight
 
-- **File tidak dimuat ke RAM.** File dibaca langsung dari disk (memory-mapped); hanya baris yang terlihat di layar yang dibaca.
-- **Satu kali baca.** Saat file besar pertama kali dibuka, xclite membacanya sekali secara berurutan dan menyimpan indeks baris serta cache kolom (Parquet terkompresi, sekitar 0,3–0,4× ukuran CSV). Pembukaan berikutnya langsung.
-- **Mesin SQL dimuat hanya saat dipakai.** `duckdb.dll` baru dibaca ketika Anda menjalankan SQL atau mengurutkan data.
-- **Hemat memori.** Sekitar 50 MB saat baru dibuka; memori SQL dilepas lagi satu menit setelah kueri terakhir.
+- **Files are not loaded into RAM.** Files are read directly from disk (memory-mapped); only the rows visible on screen are read.
+- **Read once.** The first time a large file is opened, xclite reads it sequentially once and stores a row index and column cache (compressed Parquet, around 0.3–0.4× the CSV size). Subsequent openings are immediate.
+- **The SQL engine loads only when needed.** `duckdb.dll` is loaded only when you run SQL or sort data.
+- **Memory-efficient.** Uses around 50 MB when first opened; SQL memory is released one minute after the last query.
 
-Contoh hasil pengukuran pada file sintetis 20 GB: pembukaan pertama sekitar 3,5 menit; pencarian di semua kolom sekitar 2 detik; filter angka sekitar 0,1 detik.
+Example benchmark results on a synthetic 20 GB file: first opening takes around 3.5 minutes; searching all columns takes around 2 seconds; numeric filtering takes around 0.1 seconds.
 
-## Fitur
+## Features
 
-- **Edit seperti spreadsheet:** ketik, salin/potong/tempel, Paste Special, isi otomatis, sisipkan dan hapus baris atau kolom, undo dan redo. File asli tidak diubah sampai Anda menyimpan.
-- **Rumus:** 501 fungsi lembar kerja dari GridCraft, dan format angka.
-- **Tabel bernama:** tandai sebuah rentang sebagai tabel, lalu ganti nama dan rentangnya lewat **Kelola tabel**.
-- **Cari atau Analisis:**
-  - Cari teks di semua kolom.
-  - Baris filter dan filter lanjutan (berisi, sama dengan, diawali, kosong, dan aturan angka). Kondisi bisa digabung dengan DAN/ATAU.
-  - SQL / Kueri lewat DuckDB. Kolom sheet bernama A, B, …; tiap tabel menjadi view dengan nama kolomnya sendiri.
-- **Hasil berantai:** setiap hasil filter atau kueri terbuka di tab baru dan otomatis menjadi tabel. Tabel itu bisa difilter atau di-query lagi, juga digabung (JOIN) dengan tabel di tab lain.
-- **Persiapan dan Formating:**
-  - format angka;
-  - **tipe data** per kolom (bilangan bulat, desimal, tanggal & jam), supaya kueri seperti `status >= 2` berjalan;
-  - ubah teks dengan regex (hapus atau ganti, dengan pratinjau langsung);
-  - cari & ganti, dan bersihkan data.
-- **Simpan** ke CSV atau xlsx.
+- **Spreadsheet-style editing:** type, copy/cut/paste, Paste Special, autofill, insert and delete rows or columns, undo and redo. The original file is not changed until you save.
+- **Formulas:** 501 worksheet functions from GridCraft, plus number formatting.
+- **Named tables:** mark a range as a table, then change its name and range through **Manage Tables**.
+- **Search or Analyze:**
+  - Search for text across all columns.
+  - Filter rows and use advanced filters (contains, equals, starts with, empty, and numeric rules). Conditions can be combined with AND/OR.
+  - SQL / queries via DuckDB. Sheet columns are named A, B, …; each table becomes a view using its own column names.
+- **Chained results:** each filter or query result opens in a new tab and automatically becomes a table. That table can be filtered or queried again, and joined with tables in other tabs.
+- **Data preparation and formatting:**
+  - number formatting;
+  - **data types** per column (integer, decimal, date and time), so queries such as `status >= 2` work;
+  - transform text with regex (remove or replace, with a live preview);
+  - find and replace, and clean data.
+- **Save** to CSV or XLSX.
 
-## Batasan (beta)
+## License and attribution
 
-- Teks dianggap UTF-8. Font bawaan tidak punya huruf CJK.
-- Catatan, validasi data dan nama yang ditentukan hanya tersimpan di .xlsx, tidak di CSV.
-- File Excel dibaca seluruhnya ke memori (Excel sendiri dibatasi 1.048.576 baris).
-- Sebuah `"` yang nyasar di tengah kolom tanpa tanda kutip bisa menggabungkan baris.
-
-## Membangun dari kode sumber
-
-Ditulis dalam Rust (eframe/egui, memmap2, rayon, arrow/parquet, duckdb). Di Windows, build dijalankan lewat `cargo-msvc.cmd build --release`, yang menjalankan cargo di lingkungan Visual Studio x64.
-
-## Lisensi dan atribusi
-
-- **GridCraft:** © ArtCraft Team dan kontributor GridCraft, MIT OR Apache-2.0, https://github.com/storytold/gridcraft (commit `66ce6be`).
+- **GridCraft:** © ArtCraft Team and GridCraft contributors, MIT OR Apache-2.0, https://github.com/storytold/gridcraft (commit `66ce6be`).
 - **DuckDB** (`duckdb.dll`): MIT, https://duckdb.org
-- egui/eframe, arrow/parquet dan crate Rust lainnya: MIT dan/atau Apache-2.0.
+- egui/eframe, arrow/parquet, and other Rust crates: MIT and/or Apache-2.0.
 
-## Pembuat
+## Author
 
 **M Al Muhtady**
+
 - Email: muhamadalmuhtadi@gmail.com
 - GitHub: https://github.com/muhammadalmuhtadi
